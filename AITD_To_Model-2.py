@@ -28,28 +28,6 @@ MAX_BONES       = 30
 MATERIAL_FLAT = 0x00
 MATERIAL_STIPPLED = 0x01
 
-# Todo: Get colors from AitD
-'''COLOR_RED    = 0x40
-COLOR_GREEN  = 0x80
-COLOR_BLUE   = 0xC0
-COLOR_YELLOW = 0x60
-COLOR_ORANGE = 0x50
-COLOR_TAN    = 0x20
-COLOR_GRAY   = 0x30
-COLOR_BROWN  = 0x10'''
-
-# Variables
-# Todo: Get colors from AitD
-'''colorsRed     = [1.0, 0.0, 0.0]
-colorsGreen   = [0.0, 1.0, 0.0]
-colorsBlue    = [0.0, 0.0, 1.0]
-colorsYellow  = [1.0, 1.0, 0.0]
-colorsOrange  = [1.0, 0.5, 0.0]
-colorsTan     = [1.0, 1.0, 0.75]
-colorsGray    = [0.5, 0.5, 0.5]
-colorsBrown   = [0.5, 0.25, 0.0]
-colorsTexture = [0.0, 0.0, 0.0]'''
-
 # Bone variables
 bones = []
 bonesPose = []
@@ -380,11 +358,19 @@ for i in range(0, len(armature.pose.bones)):
     for j in range(0, 0x08):
         outfile.write(struct.pack('B', 0x00)) # Padding
 
+# Get poly colors.
+for face in bpy.context.active_object.data.polygons:
+    mat = bpy.context.active_object.data.materials[face.material_index]
+
+    mat_index = 0
+    if mat and mat.name.startswith("DOS_PAL_"):
+        mat_index = int(mat.name.split("_")[-1])
+
+    polyColors.append(mat_index)
+
 # Polygon datas.
 outfile.write(struct.pack('h', len(me.polygons)))
 for i in range(0, len(me.polygons)):
-    polyColors.append(i)
-    
     outfile.write(struct.pack('B', 0x01)) # 1 Primitive
     outfile.write(struct.pack('B', 0x03)) # 3 Points (Triangle)
     outfile.write(struct.pack('B', MATERIAL_FLAT)) # Material (0x00 = Flat, 0x01 = Stippled)
